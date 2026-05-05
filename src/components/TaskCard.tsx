@@ -2,6 +2,7 @@ import React, { memo, useCallback } from 'react'
 import { Task } from '../types/task'
 import TaskStatusSelect from './TaskStatusSelect'
 import styles from './TaskCard.module.css'
+import { highlightText } from '../utils/text'
 
 type Props = {
   task: Task
@@ -10,23 +11,7 @@ type Props = {
   onSelect: (taskId: string) => void
 }
 
-const regexCache = new Map<string, RegExp>();
 
-const highlight = (text: string, term: string): React.ReactNode => {
-  if (!term.trim()) return text;
-  
-  const lowerTerm = term.toLowerCase();
-  let regex = regexCache.get(lowerTerm);
-  if (!regex) {
-    regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
-    regexCache.set(lowerTerm, regex);
-  }
-  
-  const parts = text.split(regex);
-  return parts.map((part, i) =>
-    part.toLowerCase() === lowerTerm ? <mark key={i} className={styles.highlight}>{part}</mark> : part
-  );
-}
 
 const TaskCard = ({ task, isSelected, searchTerm, onSelect }: Props) => {
   const priorityClass = styles[`priority_${task.priority}`]
@@ -60,13 +45,13 @@ const TaskCard = ({ task, isSelected, searchTerm, onSelect }: Props) => {
       </div>
 
       <h3 className={styles.cardTitle}>
-        {highlight(task.title, searchTerm)}
+        {highlightText(task.title, searchTerm, styles.highlight)}
       </h3>
 
       {isSelected && (
         <div className={styles.expanded}>
           <p className={styles.description}>
-            {highlight(task.description, searchTerm)}
+            {highlightText(task.description, searchTerm, styles.highlight)}
           </p>
           <div className={styles.actions} onClick={e => e.stopPropagation()}>
             <TaskStatusSelect

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { Task, TaskStatus } from '../types/task';
 import { fetchTasks, updateTaskStatus, createTask } from '../api/tasks';
+import { getInitialFiltersFromUrl } from '../utils/url';
 
 export interface TasksState {
   items: Task[];
@@ -12,18 +13,7 @@ export interface TasksState {
   selectedTaskId: string | null;
 }
 
-const getInitialFilters = () => {
-  if (typeof window === 'undefined') return { search: '', status: 'all' as TaskStatus | 'all' };
-  const params = new URLSearchParams(window.location.search);
-  const statusParam = params.get('status');
-  const isValidStatus = statusParam === 'all' || statusParam === 'todo' || statusParam === 'in-progress' || statusParam === 'done';
-  return {
-    search: params.get('search') || '',
-    status: isValidStatus ? (statusParam as TaskStatus | 'all') : 'all'
-  };
-};
-
-const initialFilters = getInitialFilters();
+const initialFilters = getInitialFiltersFromUrl();
 
 const initialState: TasksState = {
   items: [],
