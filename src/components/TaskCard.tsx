@@ -1,24 +1,12 @@
-// ⚠️  ASSESSMENT NOTE FOR REVIEWERS (remove before sending to candidates):
-//
-// Deliberate flaws in this file:
-//   FLAW — TaskCard is NOT wrapped in React.memo. Because the parent
-//           re-renders on every keystroke (searchTerm change), all 500
-//           TaskCard instances re-render even when their task data hasn't
-//           changed. Combined with the list size, this creates a noticeable
-//           input lag. Candidates should add React.memo and ensure stable
-//           callback references via useCallback in the parent.
-
-import React, { memo } from 'react'
-import { Task, TaskStatus } from '../types/task'
+import React, { memo, useCallback } from 'react'
+import { Task } from '../types/task'
 import TaskStatusSelect from './TaskStatusSelect'
 import styles from './TaskCard.module.css'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { toggleSelectTask } from '../store/tasksSlice'
 
 type Props = {
   task: Task
-  isSelected: boolean
-  onSelect: (id: string) => void
-  onStatusUpdate: (taskId: string, newStatus: TaskStatus) => void
-  searchTerm: string
 }
 
 // Utility: wrap matched text in a <mark> for highlighting
@@ -31,18 +19,25 @@ const highlight = (text: string, term: string): React.ReactNode => {
   )
 }
 
-// FLAW: No React.memo — re-renders on every parent state change
-const TaskCard = ({ task, isSelected, onSelect, onStatusUpdate, searchTerm }: Props) => {
+const TaskCard = ({ task }: Props) => {
+  const dispatch = useAppDispatch();
+  const isSelected = useAppSelector(state => state.tasks.selectedTaskId === task.id);
+  const searchTerm = useAppSelector(state => state.tasks.searchTerm);
+
   const priorityClass = styles[`priority_${task.priority}`]
   const statusClass = styles[`status_${task.status.replace('-', '_')}`]
+
+  const handleSelect = useCallback(() => {
+    dispatch(toggleSelectTask(task.id))
+  }, [dispatch, task.id])
 
   return (
     <li
       className={`${styles.card} ${isSelected ? styles.selected : ''}`}
-      onClick={() => onSelect(task.id)}
+      onClick={handleSelect}
       role="button"
       tabIndex={0}
-      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onSelect(task.id) }}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleSelect() }}
       aria-expanded={isSelected}
     >
       <div className={styles.cardHeader}>
@@ -72,7 +67,6 @@ const TaskCard = ({ task, isSelected, onSelect, onStatusUpdate, searchTerm }: Pr
             <TaskStatusSelect
               taskId={task.id}
               currentStatus={task.status}
-              onStatusUpdate={onStatusUpdate}
             />
           </div>
           <time className={styles.date} dateTime={task.createdAt}>

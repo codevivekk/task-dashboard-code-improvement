@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { Task, TaskStatus } from '../types/task'
 import TaskCard from './TaskCard'
 import styles from './TaskList.module.css'
-
-type Props = {
-  tasks: Task[]
-  selectedTaskId: string | null
-  onSelectTask: (id: string) => void
-  onStatusUpdate: (taskId: string, newStatus: TaskStatus) => void
-  searchTerm: string
-}
+import { useAppSelector } from '../store/hooks'
+import { selectFilteredTasks } from '../store/tasksSlice'
 
 const PAGE_SIZE = 50;
 
-const TaskList = ({ tasks, selectedTaskId, onSelectTask, onStatusUpdate, searchTerm }: Props) => {
+const TaskList = () => {
+  const tasks = useAppSelector(selectFilteredTasks);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Reset to page 1 when the task list changes (e.g. searching or filtering)
@@ -37,14 +31,7 @@ const TaskList = ({ tasks, selectedTaskId, onSelectTask, onStatusUpdate, searchT
     <div className={styles.container}>
       <ul className={styles.list} role="list">
         {visibleTasks.map(task => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            isSelected={selectedTaskId === task.id}
-            onSelect={onSelectTask}
-            onStatusUpdate={onStatusUpdate}
-            searchTerm={searchTerm}
-          />
+          <TaskCard key={task.id} task={task} />
         ))}
       </ul>
       

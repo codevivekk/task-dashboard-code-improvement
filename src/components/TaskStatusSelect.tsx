@@ -1,18 +1,21 @@
 import React from 'react'
 import { TaskStatus } from '../types/task'
 import styles from './TaskStatusSelect.module.css'
+import { useAppDispatch } from '../store/hooks'
+import { updateTaskStatusAsync } from '../store/tasksSlice'
 
 type Props = {
   taskId: string
   currentStatus: TaskStatus
-  onStatusUpdate: (taskId: string, newStatus: TaskStatus) => void
 }
 
 const STATUS_OPTIONS: TaskStatus[] = ['todo', 'in-progress', 'done']
 
-const TaskStatusSelect = ({ taskId, currentStatus, onStatusUpdate }: Props) => {
+const TaskStatusSelect = ({ taskId, currentStatus }: Props) => {
+  const dispatch = useAppDispatch();
+
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onStatusUpdate(taskId, e.target.value as TaskStatus)
+    dispatch(updateTaskStatusAsync({ id: taskId, status: e.target.value as TaskStatus }));
   }
 
   return (
