@@ -31,7 +31,7 @@ export const fetchTasksAsync = createAsyncThunk(
 
 export const updateTaskStatusAsync = createAsyncThunk(
   'tasks/updateStatus',
-  async ({ id, status }: { id: string; status: TaskStatus }) => {
+  async ({ id, status, oldStatus }: { id: string; status: TaskStatus; oldStatus: TaskStatus }) => {
     return await updateTaskStatus(id, status);
   }
 );
@@ -77,11 +77,26 @@ const tasksSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to load tasks';
       })
+      .addCase(updateTaskStatusAsync.pending, (state, action) => {
+        const { id, status } = action.meta.arg;
+        const task = state.items.find(t => t.id === id);
+        if (task) {
+          task.status = status;
+        }
+      })
       .addCase(updateTaskStatusAsync.fulfilled, (state, action) => {
         const index = state.items.findIndex(t => t.id === action.payload.id);
         if (index !== -1) {
           state.items[index] = action.payload;
         }
+      })
+      .addCase(updateTaskStatusAsync.rejected, (state, action) => {
+        const { id, oldStatus } = action.meta.arg;
+        const task = state.items.find(t => t.id === id);
+        if (task) {
+          task.status = oldStatus;
+        }
+        state.error = action.error.message || 'Failed to update task status';
       })
       .addCase(createTaskAsync.fulfilled, (state, action) => {
         state.items.unshift(action.payload);

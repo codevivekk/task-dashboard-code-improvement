@@ -14,8 +14,16 @@ const STATUS_OPTIONS: TaskStatus[] = ['todo', 'in-progress', 'done']
 const TaskStatusSelect = ({ taskId, currentStatus }: Props) => {
   const dispatch = useAppDispatch();
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    dispatch(updateTaskStatusAsync({ id: taskId, status: e.target.value as TaskStatus }));
+  const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    try {
+      await dispatch(updateTaskStatusAsync({ 
+        id: taskId, 
+        status: e.target.value as TaskStatus,
+        oldStatus: currentStatus
+      })).unwrap();
+    } catch (err) {
+      console.error('Failed to update task status:', err);
+    }
   }
 
   return (
