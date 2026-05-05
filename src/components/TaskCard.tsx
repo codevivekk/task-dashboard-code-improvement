@@ -2,7 +2,6 @@ import React, { memo, useCallback } from 'react'
 import { Task } from '../types/task'
 import TaskStatusSelect from './TaskStatusSelect'
 import styles from './TaskCard.module.css'
-// No Redux hooks imported
 
 type Props = {
   task: Task
@@ -13,7 +12,6 @@ type Props = {
 
 const regexCache = new Map<string, RegExp>();
 
-// Utility: wrap matched text in a <mark> for highlighting
 const highlight = (text: string, term: string): React.ReactNode => {
   if (!term.trim()) return text;
   

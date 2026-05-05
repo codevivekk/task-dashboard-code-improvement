@@ -12,12 +12,25 @@ export interface TasksState {
   selectedTaskId: string | null;
 }
 
+const getInitialFilters = () => {
+  if (typeof window === 'undefined') return { search: '', status: 'all' as TaskStatus | 'all' };
+  const params = new URLSearchParams(window.location.search);
+  const statusParam = params.get('status');
+  const isValidStatus = statusParam === 'all' || statusParam === 'todo' || statusParam === 'in-progress' || statusParam === 'done';
+  return {
+    search: params.get('search') || '',
+    status: isValidStatus ? (statusParam as TaskStatus | 'all') : 'all'
+  };
+};
+
+const initialFilters = getInitialFilters();
+
 const initialState: TasksState = {
   items: [],
   loading: false,
   error: null,
-  searchTerm: '',
-  statusFilter: 'all',
+  searchTerm: initialFilters.search,
+  statusFilter: initialFilters.status,
   showAddForm: false,
   selectedTaskId: null,
 };

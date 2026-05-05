@@ -8,7 +8,8 @@ import { fetchTasksAsync, toggleAddForm, setSearchTerm, selectFilteredTasks } fr
 
 const App = () => {
   const dispatch = useAppDispatch();
-  const { items, loading, error, searchTerm: reduxSearchTerm, showAddForm } = useAppSelector(state => state.tasks);
+  
+  const { items, loading, error, searchTerm: reduxSearchTerm, statusFilter, showAddForm } = useAppSelector((state: any) => state.tasks);
   const filteredTasks = useAppSelector(selectFilteredTasks);
 
   const [localSearchTerm, setLocalSearchTerm] = useState(reduxSearchTerm);
@@ -16,6 +17,26 @@ const App = () => {
   useEffect(() => {
     dispatch(fetchTasksAsync());
   }, [dispatch]);
+
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (reduxSearchTerm) {
+      params.set('search', reduxSearchTerm);
+    } else {
+      params.delete('search');
+    }
+    
+    if (statusFilter !== 'all') {
+      params.set('status', statusFilter);
+    } else {
+      params.delete('status');
+    }
+    
+    const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+    window.history.replaceState({}, '', newUrl);
+  }, [reduxSearchTerm, statusFilter]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
