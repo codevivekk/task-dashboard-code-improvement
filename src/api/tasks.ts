@@ -1,10 +1,5 @@
 import { Task, User } from '../types/task'
-
-// Simulated network delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-
-// ─── Seed data ────────────────────────────────────────────────────────────────
-
 const STATUSES = ['todo', 'in-progress', 'done'] as const
 const PRIORITIES = ['low', 'medium', 'high'] as const
 const ASSIGNEES = ['Alice', 'Bob', 'Carol', 'David', 'Eve']
@@ -20,7 +15,7 @@ const generateTasks = (): Task[] =>
     createdAt: new Date(Date.now() - i * 86400000).toISOString(),
   }))
 
-// In-memory store so mutations persist across API calls within a session
+
 let taskStore: Task[] = generateTasks()
 
 export const MOCK_USERS: User[] = ASSIGNEES.map((name, i) => ({
@@ -29,7 +24,7 @@ export const MOCK_USERS: User[] = ASSIGNEES.map((name, i) => ({
   avatar: name[0].toUpperCase(),
 }))
 
-// ─── API functions ────────────────────────────────────────────────────────────
+
 
 export const fetchTasks = async (): Promise<Task[]> => {
   await delay(600)

@@ -8,7 +8,6 @@ import App from '../App';
 import * as api from '../api/tasks';
 import { Task } from '../types/task';
 
-// Mock the API layer
 jest.mock('../api/tasks');
 
 const mockFetchTasks = api.fetchTasks as jest.Mock;
@@ -70,7 +69,6 @@ describe('Task Dashboard Integration Tests', () => {
     
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Create Task/i }));
-      // flush promises
       await new Promise(r => setTimeout(r, 10));
     });
 
@@ -103,7 +101,6 @@ describe('Task Dashboard Integration Tests', () => {
     
     await act(async () => {
       fireEvent.change(select, { target: { value: 'done' } });
-      // flush promises
       await new Promise(r => setTimeout(r, 10));
     });
 
