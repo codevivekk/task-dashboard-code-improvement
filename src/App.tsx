@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect, useCallback, useState } from 'react'
 import TaskList from './components/TaskList'
 import TaskStats from './components/TaskStats'
 import AddTaskForm from './components/AddTaskForm'
@@ -8,16 +8,25 @@ import { fetchTasksAsync, toggleAddForm, setSearchTerm, selectFilteredTasks } fr
 
 const App = () => {
   const dispatch = useAppDispatch();
-  const { items, loading, error, searchTerm, showAddForm } = useAppSelector(state => state.tasks);
+  const { items, loading, error, searchTerm: reduxSearchTerm, showAddForm } = useAppSelector(state => state.tasks);
   const filteredTasks = useAppSelector(selectFilteredTasks);
+
+  const [localSearchTerm, setLocalSearchTerm] = useState(reduxSearchTerm);
 
   useEffect(() => {
     dispatch(fetchTasksAsync());
   }, [dispatch]);
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      dispatch(setSearchTerm(localSearchTerm));
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [localSearchTerm, dispatch]);
+
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setSearchTerm(e.target.value));
-  }, [dispatch]);
+    setLocalSearchTerm(e.target.value);
+  }, []);
 
   return (
     <div className={styles.app}>
@@ -42,7 +51,7 @@ const App = () => {
           <input
             type="search"
             placeholder="Search tasks by title or description…"
-            value={searchTerm}
+            value={localSearchTerm}
             onChange={handleSearchChange}
             className={styles.searchInput}
             aria-label="Search tasks"

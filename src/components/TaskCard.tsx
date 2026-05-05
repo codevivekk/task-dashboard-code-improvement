@@ -9,14 +9,23 @@ type Props = {
   task: Task
 }
 
+const regexCache = new Map<string, RegExp>();
+
 // Utility: wrap matched text in a <mark> for highlighting
 const highlight = (text: string, term: string): React.ReactNode => {
-  if (!term.trim()) return text
-  const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-  const parts = text.split(regex)
+  if (!term.trim()) return text;
+  
+  const lowerTerm = term.toLowerCase();
+  let regex = regexCache.get(lowerTerm);
+  if (!regex) {
+    regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
+    regexCache.set(lowerTerm, regex);
+  }
+  
+  const parts = text.split(regex);
   return parts.map((part, i) =>
-    regex.test(part) ? <mark key={i} className={styles.highlight}>{part}</mark> : part
-  )
+    part.toLowerCase() === lowerTerm ? <mark key={i} className={styles.highlight}>{part}</mark> : part
+  );
 }
 
 const TaskCard = ({ task }: Props) => {

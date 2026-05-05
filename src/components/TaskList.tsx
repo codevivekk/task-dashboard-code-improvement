@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import TaskCard from './TaskCard'
 import styles from './TaskList.module.css'
 import { useAppSelector } from '../store/hooks'
@@ -9,11 +9,12 @@ const PAGE_SIZE = 50;
 const TaskList = () => {
   const tasks = useAppSelector(selectFilteredTasks);
   const [currentPage, setCurrentPage] = useState(1);
+  const [prevTasks, setPrevTasks] = useState(tasks);
 
-  // Reset to page 1 when the task list changes (e.g. searching or filtering)
-  useEffect(() => {
+  if (tasks !== prevTasks) {
+    setPrevTasks(tasks);
     setCurrentPage(1);
-  }, [tasks]);
+  }
 
   if (tasks.length === 0) {
     return (
