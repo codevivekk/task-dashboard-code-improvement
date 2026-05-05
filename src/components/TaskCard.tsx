@@ -2,11 +2,13 @@ import React, { memo, useCallback } from 'react'
 import { Task } from '../types/task'
 import TaskStatusSelect from './TaskStatusSelect'
 import styles from './TaskCard.module.css'
-import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { toggleSelectTask } from '../store/tasksSlice'
+// No Redux hooks imported
 
 type Props = {
   task: Task
+  isSelected: boolean
+  searchTerm: string
+  onSelect: (taskId: string) => void
 }
 
 const regexCache = new Map<string, RegExp>();
@@ -28,17 +30,13 @@ const highlight = (text: string, term: string): React.ReactNode => {
   );
 }
 
-const TaskCard = ({ task }: Props) => {
-  const dispatch = useAppDispatch();
-  const isSelected = useAppSelector(state => state.tasks.selectedTaskId === task.id);
-  const searchTerm = useAppSelector(state => state.tasks.searchTerm);
-
+const TaskCard = ({ task, isSelected, searchTerm, onSelect }: Props) => {
   const priorityClass = styles[`priority_${task.priority}`]
   const statusClass = styles[`status_${task.status.replace('-', '_')}`]
 
   const handleSelect = useCallback(() => {
-    dispatch(toggleSelectTask(task.id))
-  }, [dispatch, task.id])
+    onSelect(task.id)
+  }, [onSelect, task.id])
 
   return (
     <li

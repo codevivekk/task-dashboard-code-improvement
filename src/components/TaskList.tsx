@@ -1,13 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import TaskCard from './TaskCard'
 import styles from './TaskList.module.css'
-import { useAppSelector } from '../store/hooks'
-import { selectFilteredTasks } from '../store/tasksSlice'
+import { useAppSelector, useAppDispatch } from '../store/hooks'
+import { selectFilteredTasks, toggleSelectTask, AppState } from '../store/tasksSlice'
 
 const PAGE_SIZE = 50;
 
 const TaskList = () => {
   const tasks = useAppSelector(selectFilteredTasks);
+  const searchTerm = useAppSelector((state: any) => state.tasks.searchTerm);
+  const selectedTaskId = useAppSelector((state: any) => state.tasks.selectedTaskId);
+  const dispatch = useAppDispatch();
+
+  const handleSelectTask = useCallback((id: string) => {
+    dispatch(toggleSelectTask(id));
+  }, [dispatch]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [prevTasks, setPrevTasks] = useState(tasks);
 
@@ -32,7 +40,13 @@ const TaskList = () => {
     <div className={styles.container}>
       <ul className={styles.list} role="list">
         {visibleTasks.map(task => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard 
+            key={task.id} 
+            task={task} 
+            isSelected={selectedTaskId === task.id}
+            searchTerm={searchTerm}
+            onSelect={handleSelectTask}
+          />
         ))}
       </ul>
       
