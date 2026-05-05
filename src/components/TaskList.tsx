@@ -1,13 +1,4 @@
-// ⚠️  ASSESSMENT NOTE FOR REVIEWERS (remove before sending to candidates):
-//
-// Deliberate flaws in this file:
-//   FLAW — This component receives and renders ALL tasks without any
-//           windowing, virtualisation, or pagination. Rendering 500 DOM nodes
-//           simultaneously causes significant layout and paint cost.
-//           Candidates should implement pagination OR a windowed list
-//           (e.g. react-window / react-virtual) OR infinite scroll.
-
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Task, TaskStatus } from '../types/task'
 import TaskCard from './TaskCard'
 import styles from './TaskList.module.css'
@@ -20,8 +11,16 @@ type Props = {
   searchTerm: string
 }
 
-// Straightforward functional component — the flaw is purely in what it renders
+const PAGE_SIZE = 50;
+
 const TaskList = ({ tasks, selectedTaskId, onSelectTask, onStatusUpdate, searchTerm }: Props) => {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 when the task list changes (e.g. searching or filtering)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tasks]);
+
   if (tasks.length === 0) {
     return (
       <div className={styles.empty}>
@@ -30,20 +29,47 @@ const TaskList = ({ tasks, selectedTaskId, onSelectTask, onStatusUpdate, searchT
     )
   }
 
+  const totalPages = Math.ceil(tasks.length / PAGE_SIZE);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const visibleTasks = tasks.slice(startIndex, startIndex + PAGE_SIZE);
+
   return (
-    <ul className={styles.list} role="list">
-      {/* FLAW: all 500 items rendered — no virtualisation */}
-      {tasks.map(task => (
-        <TaskCard
-          key={task.id}
-          task={task}
-          isSelected={selectedTaskId === task.id}
-          onSelect={onSelectTask}
-          onStatusUpdate={onStatusUpdate}
-          searchTerm={searchTerm}
-        />
-      ))}
-    </ul>
+    <div className={styles.container}>
+      <ul className={styles.list} role="list">
+        {visibleTasks.map(task => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            isSelected={selectedTaskId === task.id}
+            onSelect={onSelectTask}
+            onStatusUpdate={onStatusUpdate}
+            searchTerm={searchTerm}
+          />
+        ))}
+      </ul>
+      
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button 
+            className={styles.pageButton} 
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          >
+            Previous
+          </button>
+          <span className={styles.pageInfo}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button 
+            className={styles.pageButton}
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 

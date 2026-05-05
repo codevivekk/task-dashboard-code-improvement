@@ -8,7 +8,7 @@
 //           input lag. Candidates should add React.memo and ensure stable
 //           callback references via useCallback in the parent.
 
-import React from 'react'
+import React, { memo } from 'react'
 import { Task, TaskStatus } from '../types/task'
 import TaskStatusSelect from './TaskStatusSelect'
 import styles from './TaskCard.module.css'
@@ -84,4 +84,4 @@ const TaskCard = ({ task, isSelected, onSelect, onStatusUpdate, searchTerm }: Pr
   )
 }
 
-export default TaskCard
+export default memo(TaskCard)
